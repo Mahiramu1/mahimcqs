@@ -1,0 +1,5 @@
+import {createHash} from 'node:crypto';
+export function validURL(v){try{const url=new URL(v);return ['https:','http:'].includes(url.protocol)}catch{return false}}
+export function validPYQ(q){return q&&typeof q.exam==='string'&&q.exam.length<=60&&Number.isInteger(q.year)&&q.year>1950&&q.year<=new Date().getFullYear()&&typeof q.paper==='string'&&q.paper.length>2&&typeof q.question==='string'&&q.question.length>15&&Array.isArray(q.options)&&q.options.length===4&&q.options.every(o=>typeof o==='string'&&o.trim())&&Number.isInteger(q.answer)&&q.answer>=0&&q.answer<4&&validURL(q.sourceUrl)}
+export function validArticle(x){return x&&typeof x.title==='string'&&x.title.length>10&&x.title.length<250&&typeof x.summary==='string'&&x.summary.length>20&&x.summary.length<2000&&typeof x.publisher==='string'&&x.publisher.length<100&&typeof x.publishedAt==='string'&&!Number.isNaN(Date.parse(x.publishedAt))&&validURL(x.sourceUrl)}
+export function contentId(kind,obj){return createHash('sha256').update(kind+'|'+obj.sourceUrl+'|'+(obj.question||obj.title)).digest('hex')}
