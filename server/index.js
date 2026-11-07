@@ -1,3 +1,4 @@
+import {searchPYQ,pyqCount} from './pyq-data.js';
 import 'dotenv/config';
 import express from 'express';import helmet from 'helmet';import rateLimit from 'express-rate-limit';import admin from 'firebase-admin';import {createHash,randomUUID} from 'node:crypto';import path from 'node:path';import {fileURLToPath} from 'node:url';import fs from 'node:fs';
 const app=express();app.use(helmet({contentSecurityPolicy:false}));app.use(express.json({limit:'300kb'}));app.use('/api',rateLimit({windowMs:60_000,limit:30,standardHeaders:'draft-7',legacyHeaders:false}));
@@ -7,6 +8,7 @@ async function authenticate(req,res,next){const token=req.headers.authorization?
 function normalized(text){return text.normalize('NFC').replace(/\s+/gu,' ').trim();}
 function keyFor(data){return createHash('sha256').update(JSON.stringify(data)).digest('hex');}
 const questionSchema=q=>q&&typeof q.question==='string'&&Array.isArray(q.options)&&q.options.length===4&&q.options.every(v=>typeof v==='string'&&v.trim())&&Number.isInteger(q.answer)&&q.answer>=0&&q.answer<4&&typeof q.explanation==='string'&&typeof q.source==='string';
+app.get('/api/pyqs',authenticate,(req,res)=>{const exam=String(req.query.exam||'').slice(0,60),term=String(req.query.term||'').slice(0,100),year=req.query.year?Number(req.query.year):undefined;if(year&&(!Number.isInteger(year)||year<1950||year>2100))return failure(res,400,'Invalid year');const questions=searchPYQ({exam,term,year});res.json({questions,totalVerifiedInDataset:pyqCount(),note:'Only sourced imported PYQs are returned; no external datasets are currently bundled.'});});
 app.get('/api/health',(_req,res)=>res.json({ok:true,service:'MahiMCQs API'}));
 app.post('/api/generate',authenticate,async(req,res)=>{const {bookId,page,text,exam='UPSC',language='English',count=5}=req.body||{};if(typeof bookId!=='string'||!Number.isInteger(page)||page<1||typeof text!=='string'||text.length<100||text.length>18000||!['English','Telugu'].includes(language)||!Number.isInteger(count)||count<1||count>10||typeof exam!=='string'||exam.length>50)return failure(res,400,'Invalid page or generation settings');
 const bookRef=db.doc(`users/${req.user.uid}/books/${bookId}`);const book=await bookRef.get();if(!book.exists)return failure(res,403,'Book not accessible');const source=normalized(text);const model=process.env.GEMINI_MODEL||'gemini-2.5-flash';const cacheKey=keyFor({v:1,source,exam,language,count,model});const ref=db.doc('page_mcq_cache/'+cacheKey);let isOwner=false;const now=Date.now();let existing;
