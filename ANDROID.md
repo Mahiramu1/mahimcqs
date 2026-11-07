@@ -1,0 +1,3 @@
+# Android delivery
+MahiMCQs now includes an installable web app manifest and app icon. On a supported Android browser, use **Add to Home Screen** for a lightweight home-screen experience once deployed over HTTPS.
+This is **not a native Android APK**. For Play Store release, configure and build a trusted TWA/Bubblewrap Android wrapper after the hosted PWA is production-ready, has a valid web manifest, HTTPS, and passes Google's current Play policies. A signed APK/AAB, Play Console registration, and domain asset-links verification are still required. Do not publish an unsigned or untested build.
