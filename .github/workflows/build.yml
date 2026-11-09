@@ -13,6 +13,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm run build
       - run: npm test
+
+      - name: Verify production server and web bundle
+        run: |
+          PORT=3987 npm start > /tmp/mahimcqs-server.log 2>&1 &
+          trap 'kill $! 2>/dev/null || true' EXIT
+          curl -fsS --retry 15 --retry-connrefused --retry-delay 1 http://localhost:3987/api/health | node -e "const v=JSON.parse(require('fs').readFileSync(0)); if(v.ok !== true || v.service !== 'MahiMCQs API') process.exit(1)"
+          curl -fsS http://localhost:3987/ | grep -F 'MahiMCQs'
+          test -s dist/index.html
