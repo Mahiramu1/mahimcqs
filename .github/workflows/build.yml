@@ -19,8 +19,14 @@ jobs:
 
       - name: Verify production server and web bundle
         run: |
-          PORT=3987 npm start > /tmp/mahimcqs-server.log 2>&1 &
+          PORT=3987 node server/index.js > /tmp/mahimcqs-server.log 2>&1 &
           trap 'kill $! 2>/dev/null || true' EXIT
           curl -fsS --retry 15 --retry-connrefused --retry-delay 1 http://localhost:3987/api/health | node -e "const v=JSON.parse(require('fs').readFileSync(0)); if(v.ok !== true || v.service !== 'MahiMCQs API') process.exit(1)"
           curl -fsS http://localhost:3987/ | grep -F 'MahiMCQs'
           test -s dist/index.html
+      - name: Exercise public quiz and PDF reader in Chrome
+        run: |
+          python -m pip install playwright reportlab
+          PORT=3987 node server/index.js &
+          trap 'kill $! 2>/dev/null || true' EXIT
+          python tests/browser_smoke.py
