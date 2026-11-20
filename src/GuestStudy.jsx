@@ -68,7 +68,7 @@ export default function GuestStudy({ signIn }) {
   return <section className="card" style={{maxWidth:850, margin:'24px auto'}}>
     <h1>Study with MahiMCQs</h1>
     <p>Read a PDF on this device or practise with a short biology quiz.</p>
-    {signIn && <section className="login-panel"><h2>Sign in or create your account</h2><p>Save your books and create English or Telugu MCQs from PDF pages.</p>{signIn}</section>}
+    {signIn && <section className="login-panel"><h2>Sign in with your email</h2><p>Save your books and create English or Telugu MCQs from PDF pages.</p>{signIn}</section>}
     <div className="actions"><label className="btn secondary">Open a PDF<input type="file" hidden accept="application/pdf" onChange={openFile}/></label>
       <button className="btn" onClick={() => setActive(true)}>Start biology quiz</button></div>
     {error && <p role="alert">{error}</p>}

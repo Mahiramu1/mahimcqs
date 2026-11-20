@@ -13,6 +13,15 @@ def check_study_app(page, pdf_path):
     with build_opener(ProxyHandler({})).open(base + "/api/health") as response:
         assert json.load(response)["ok"]
     page.goto(base)
+    # Verify only email/password auth is offered before touching the public study area.
+    page.get_by_label("Email address").wait_for()
+    page.get_by_role("button", name="Create account").click()
+    page.get_by_label("Confirm password").wait_for()
+    page.get_by_role("button", name="Forgot password?").click()
+    page.get_by_role("button", name="Email password reset link").wait_for()
+    page.get_by_role("button", name="Log in", exact=True).first.click()
+    assert page.get_by_text("Continue with Google").count() == 0
+    assert page.get_by_text("Sign in with mobile OTP").count() == 0
     page.get_by_role("button", name="Start biology quiz").click()
     for index, answer in enumerate([1, 0, 2, 3]):
         page.locator(f'input[name="practice-{index}"]').nth(answer).check()
