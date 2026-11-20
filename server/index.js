@@ -1,11 +1,12 @@
 import {validPYQ,validArticle,contentId} from './content.js';
+import {isPasswordProvider} from './auth.js';
 import {searchPYQ,pyqCount} from './pyq-data.js';
 import 'dotenv/config';
 import express from 'express';import helmet from 'helmet';import rateLimit from 'express-rate-limit';import admin from 'firebase-admin';import {createHash,randomUUID} from 'node:crypto';import path from 'node:path';import {fileURLToPath} from 'node:url';import fs from 'node:fs';
 const app=express();app.use(helmet({contentSecurityPolicy:false}));app.use(express.json({limit:'300kb'}));app.use('/api',rateLimit({windowMs:60_000,limit:30,standardHeaders:'draft-7',legacyHeaders:false}));
 if(!admin.apps.length){const pk=process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g,'\n');const credential=process.env.FIREBASE_CLIENT_EMAIL&&pk?admin.credential.cert({projectId:process.env.FIREBASE_PROJECT_ID,clientEmail:process.env.FIREBASE_CLIENT_EMAIL,privateKey:pk}):admin.credential.applicationDefault();admin.initializeApp({credential,projectId:process.env.FIREBASE_PROJECT_ID});}const db=admin.firestore();
 const failure=(res,status,message)=>res.status(status).json({error:message});
-async function authenticate(req,res,next){const token=req.headers.authorization?.replace(/^Bearer /,'');if(!token)return failure(res,401,'Sign in to continue');try{req.user=await admin.auth().verifyIdToken(token,true);next();}catch{return failure(res,401,'Session expired; please sign in again');}}
+async function authenticate(req,res,next){const token=req.headers.authorization?.replace(/^Bearer /,'');if(!token)return failure(res,401,'Sign in to continue');try{const verified=await admin.auth().verifyIdToken(token,true);if(!isPasswordProvider(verified))return failure(res,403,'Sign in using email and password');req.user=verified;next();}catch{return failure(res,401,'Session expired; please sign in again');}}
 function normalized(text){return text.normalize('NFC').replace(/\s+/gu,' ').trim();}
 function keyFor(data){return createHash('sha256').update(JSON.stringify(data)).digest('hex');}
 const questionSchema=q=>q&&typeof q.question==='string'&&Array.isArray(q.options)&&q.options.length===4&&q.options.every(v=>typeof v==='string'&&v.trim())&&Number.isInteger(q.answer)&&q.answer>=0&&q.answer<4&&typeof q.explanation==='string'&&typeof q.source==='string';

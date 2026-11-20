@@ -1,3 +1,5 @@
+> **Current login requirement (2026-11-20):** MahiMCQs uses **email and password only**, with registration and password reset. The older product brief below describes historical Google/phone OTP requests; do **not** implement those legacy sign-in methods. See [EMAIL-PASSWORD-LOGIN.md](EMAIL-PASSWORD-LOGIN.md).
+
 # mahimcqs
 **The repository is empty. What should the app do, and who is it for? Please share the main features or any product brief you have.**
 
