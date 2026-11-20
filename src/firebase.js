@@ -6,3 +6,4 @@ const config = {apiKey:import.meta.env.VITE_FIREBASE_API_KEY,authDomain:import.m
 export const configured = Boolean(config.apiKey && config.projectId && config.appId);
 const app=initializeApp(configured?config:{apiKey:'not-configured',authDomain:'invalid.local',projectId:'unconfigured',appId:'unconfigured'});
 export const auth=getAuth(app); export const db=getFirestore(app); export const storage=getStorage(app); export const googleProvider=new GoogleAuthProvider();
+googleProvider.setCustomParameters({prompt:'select_account'});
