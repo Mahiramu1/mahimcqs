@@ -2,6 +2,10 @@
 
 MahiMCQs uses **Firebase Authentication Google provider**; never ask users to enter their Gmail password into the app. The Google button uses the popup flow and the existing Firebase ID-token-secured backend and user-scoped Firestore paths.
 
+### Remembered sign-in
+
+After the **first** successful Google sign-in, Firebase Auth normally keeps the session in the browser's local storage; refreshing or reopening MahiMCQs on the **same browser and device** restores the private dashboard without another click. A user who signs out, clears site data, uses private browsing, or changes devices must choose **Continue with Google** again. MahiMCQs does not silently sign in an account that has never authorized the app. We intentionally do **not** force Google to show the account picker on every new sign-in; Google may still request account selection or consent when necessary.
+
 ## Activate in Firebase (required before live login works)
 
 1. In [Firebase Console](https://console.firebase.google.com/), select the Firebase project for MahiMCQs (or create a project and Web App).
