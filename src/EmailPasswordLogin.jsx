@@ -85,3 +85,4 @@ export default function EmailPasswordLogin(){
     </form>
     <p className="small muted">Accounts are secured by Firebase Authentication. Your password is not stored in MahiMCQs or in its GitHub repository.</p>
   </div>;
+}
